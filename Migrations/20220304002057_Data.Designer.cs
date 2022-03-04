@@ -5,14 +5,14 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using api_web.Models;
+using api_web.Context;
 
 #nullable disable
 
 namespace api_web.Migrations
 {
-    [DbContext(typeof(consultorioContext))]
-    [Migration("20220227212351_Data")]
+    [DbContext(typeof(ConsultorioContext))]
+    [Migration("20220304002057_Data")]
     partial class Data
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -47,26 +47,6 @@ namespace api_web.Migrations
                     b.ToTable("calle", (string)null);
                 });
 
-            modelBuilder.Entity("api_web.Models.Consulta", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Tipoconsulta")
-                        .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("character varying(40)")
-                        .HasColumnName("tipoconsulta");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("consulta", (string)null);
-                });
-
             modelBuilder.Entity("api_web.Models.Consultoriomedico", b =>
                 {
                     b.Property<int>("Id")
@@ -88,6 +68,13 @@ namespace api_web.Migrations
                         .IsUnique();
 
                     b.ToTable("consultoriomedico", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Nombre = "consultorio"
+                        });
                 });
 
             modelBuilder.Entity("api_web.Models.Enfermedad", b =>
@@ -345,10 +332,6 @@ namespace api_web.Migrations
                         .HasColumnType("character varying(255)")
                         .HasColumnName("conducta");
 
-                    b.Property<int>("Consultaid")
-                        .HasColumnType("integer")
-                        .HasColumnName("consultaid");
-
                     b.Property<string>("Numhc")
                         .IsRequired()
                         .HasMaxLength(25)
@@ -361,12 +344,16 @@ namespace api_web.Migrations
                         .HasColumnType("character varying(255)")
                         .HasColumnName("problemasalud");
 
+                    b.Property<int>("Tipoconsultamid")
+                        .HasColumnType("integer")
+                        .HasColumnName("tipoconsultamid");
+
                     b.HasKey("Hojacargoid", "Poblacionid")
                         .HasName("poblacionhojacargo_pkey");
 
-                    b.HasIndex("Consultaid");
-
                     b.HasIndex("Poblacionid");
+
+                    b.HasIndex("Tipoconsultamid");
 
                     b.ToTable("poblacionhojacargo", (string)null);
                 });
@@ -423,6 +410,34 @@ namespace api_web.Migrations
                         .IsUnique();
 
                     b.ToTable("rol", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Administrador",
+                            Role = "ROLE_ADMIN"
+                        });
+                });
+
+            modelBuilder.Entity("api_web.Models.Tipoconsultam", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("tipo");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("tipoconsultam", (string)null);
                 });
 
             modelBuilder.Entity("api_web.Models.User", b =>
@@ -435,7 +450,6 @@ namespace api_web.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Apellidos")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
                         .HasColumnName("apellidos");
@@ -454,17 +468,24 @@ namespace api_web.Migrations
                         .HasColumnType("date")
                         .HasColumnName("fecha");
 
+                    b.Property<bool?>("Isactivo")
+                        .HasColumnType("boolean")
+                        .HasColumnName("isactivo");
+
                     b.Property<string>("Nombre")
-                        .IsRequired()
                         .HasMaxLength(60)
                         .HasColumnType("character varying(60)")
                         .HasColumnName("nombre");
 
-                    b.Property<string>("Password")
+                    b.Property<byte[]>("Password")
                         .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("character varying(150)")
+                        .HasColumnType("bytea")
                         .HasColumnName("password");
+
+                    b.Property<byte[]>("Passwordsalt")
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("passwordsalt");
 
                     b.Property<string>("Usuario")
                         .IsRequired()
@@ -480,6 +501,17 @@ namespace api_web.Migrations
                         .IsUnique();
 
                     b.ToTable("User", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Consultoriomedicoid = 1,
+                            Email = "admin@gmail.com",
+                            Password = new byte[] { 247, 115, 186, 192, 35, 179, 179, 194, 90, 126, 166, 251, 189, 159, 220, 139, 222, 183, 155, 79, 148, 153, 105, 246, 236, 44, 18, 11, 198, 155, 115, 85, 66, 120, 163, 63, 142, 82, 201, 194, 201, 215, 149, 96, 245, 93, 36, 101, 192, 158, 128, 38, 224, 250, 87, 177, 70, 7, 44, 50, 78, 229, 234, 217 },
+                            Passwordsalt = new byte[] { 247, 27, 85, 219, 243, 1, 75, 113, 255, 25, 44, 39, 56, 207, 57, 146, 132, 223, 8, 211, 50, 179, 25, 44, 72, 167, 3, 246, 96, 227, 91, 9, 129, 74, 225, 31, 108, 199, 121, 77, 31, 217, 111, 49, 144, 91, 242, 246, 199, 251, 241, 106, 216, 64, 234, 6, 151, 12, 25, 62, 114, 158, 124, 13, 73, 69, 103, 93, 75, 115, 227, 125, 19, 32, 82, 64, 89, 69, 5, 27, 39, 167, 201, 144, 232, 49, 9, 4, 174, 82, 177, 91, 176, 164, 104, 7, 21, 51, 191, 153, 191, 198, 215, 222, 57, 183, 213, 55, 185, 133, 132, 214, 161, 127, 173, 32, 139, 124, 182, 207, 172, 246, 185, 150, 7, 92, 155, 16 },
+                            Usuario = "admin"
+                        });
                 });
 
             modelBuilder.Entity("api_web.Models.Userrol", b =>
@@ -502,6 +534,14 @@ namespace api_web.Migrations
                     b.HasIndex("Rolid");
 
                     b.ToTable("userrol", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Userid = 1,
+                            Rolid = 1,
+                            Fecha = new DateOnly(1, 1, 1)
+                        });
                 });
 
             modelBuilder.Entity("api_web.Models.Hojacargo", b =>
@@ -590,12 +630,6 @@ namespace api_web.Migrations
 
             modelBuilder.Entity("api_web.Models.Poblacionhojacargo", b =>
                 {
-                    b.HasOne("api_web.Models.Consulta", "Consulta")
-                        .WithMany("Poblacionhojacargos")
-                        .HasForeignKey("Consultaid")
-                        .IsRequired()
-                        .HasConstraintName("fkpoblacionh60564");
-
                     b.HasOne("api_web.Models.Hojacargo", "Hojacargo")
                         .WithMany("Poblacionhojacargos")
                         .HasForeignKey("Hojacargoid")
@@ -608,11 +642,17 @@ namespace api_web.Migrations
                         .IsRequired()
                         .HasConstraintName("fkpoblacionh179340");
 
-                    b.Navigation("Consulta");
+                    b.HasOne("api_web.Models.Tipoconsultam", "Tipoconsultam")
+                        .WithMany("Poblacionhojacargos")
+                        .HasForeignKey("Tipoconsultamid")
+                        .IsRequired()
+                        .HasConstraintName("fkpoblacionh100994");
 
                     b.Navigation("Hojacargo");
 
                     b.Navigation("Poblacion");
+
+                    b.Navigation("Tipoconsultam");
                 });
 
             modelBuilder.Entity("api_web.Models.Poblacionintervension", b =>
@@ -669,11 +709,6 @@ namespace api_web.Migrations
                     b.Navigation("Poblacions");
                 });
 
-            modelBuilder.Entity("api_web.Models.Consulta", b =>
-                {
-                    b.Navigation("Poblacionhojacargos");
-                });
-
             modelBuilder.Entity("api_web.Models.Consultoriomedico", b =>
                 {
                     b.Navigation("Hojacargos");
@@ -722,6 +757,11 @@ namespace api_web.Migrations
             modelBuilder.Entity("api_web.Models.Rol", b =>
                 {
                     b.Navigation("Userrols");
+                });
+
+            modelBuilder.Entity("api_web.Models.Tipoconsultam", b =>
+                {
+                    b.Navigation("Poblacionhojacargos");
                 });
 
             modelBuilder.Entity("api_web.Models.User", b =>

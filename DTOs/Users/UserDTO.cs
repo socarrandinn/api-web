@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace api_web.DTOs
+namespace api_web.DTOs.Users
 {
     public class UserDTO
     {

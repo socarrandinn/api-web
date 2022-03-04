@@ -8,41 +8,27 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using api_web.Models;
 using System.Security.Cryptography;
-using api_web.DTOs;
+using api_web.DTOs.Users;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using api_web.Context;
+using Microsoft.AspNetCore.Authorization;
 
 namespace api_web.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class UsersController : ControllerBase
     {
-        private readonly consultorioContext _context;
+        private readonly ConsultorioContext _context;
         private readonly IMapper _mapper;
 
-        public UsersController(consultorioContext context, IMapper mapper)
+        public UsersController(ConsultorioContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
         }
-        /*private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt )
-        {
-            using (var hmac = new HMACSHA512)
-            {
-                passwordSalt = hmac.Key;
-                passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-
-            }
-        }*/
-      /*  //Register User
-        [HttpPost("registrar")]
-        public async Task<ActionResult<User>> Registrar(User user)
-        {
-
-            CreatePasswordHash(user.Password, out byte[] passwordHash, out byte[] passwordSalt);
-            //user.Nombre = 
-        }*/
 
         // GET: api/Users
         [HttpGet]
@@ -107,7 +93,7 @@ namespace api_web.Controllers
                 Usuario = model.Usuario,
                 Nombre = model.Nombre,
                 Apellidos = model.Apellidos,
-                Password = BCrypt.Net.BCrypt.HashPassword(model.Password),               
+              //  Password = BCrypt.Net.BCrypt.HashPassword(model.Password),               
                 Email = model.Email,
                 Consultoriomedicoid = model.Consultoriomedicoid,
                 //Fecha = DateOnly.Parse(model.Fecha)

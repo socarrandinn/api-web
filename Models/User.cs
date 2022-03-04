@@ -13,14 +13,16 @@ namespace api_web.Models
 
         public int Id { get; set; }
         public string Usuario { get; set; } = null!;
-        public string Password { get; set; } = null!;
-        public string Nombre { get; set; } = null!;
-        public string Apellidos { get; set; } = null!;
-        public DateOnly? Fecha { get; set; } 
+        public byte[] Password { get; set; } = null!;
+        public string? Nombre { get; set; }
+        public string? Apellidos { get; set; }
+        public DateOnly? Fecha { get; set; }
         public string Email { get; set; } = null!;
+        public byte[] Passwordsalt { get; set; } = null!;
         public int Consultoriomedicoid { get; set; }
-        
-        public virtual Consultoriomedico Consultoriomedico { get; set; } = null!;              
+        public bool? Isactivo { get; set; }
+
+        public virtual Consultoriomedico Consultoriomedico { get; set; } = null!;
         public virtual ICollection<Hojacargo> Hojacargos { get; set; }
         public virtual ICollection<Userrol> Userrols { get; set; }
     }

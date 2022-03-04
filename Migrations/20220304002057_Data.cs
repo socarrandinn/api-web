@@ -24,19 +24,6 @@ namespace api_web.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "consulta",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    tipoconsulta = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_consulta", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "consultoriomedico",
                 columns: table => new
                 {
@@ -116,18 +103,33 @@ namespace api_web.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "tipoconsultam",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    tipo = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_tipoconsultam", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "User",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     usuario = table.Column<string>(type: "character varying(30)", maxLength: 30, nullable: false),
-                    password = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
-                    nombre = table.Column<string>(type: "character varying(60)", maxLength: 60, nullable: false),
-                    apellidos = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    password = table.Column<byte[]>(type: "bytea", nullable: false),
+                    nombre = table.Column<string>(type: "character varying(60)", maxLength: 60, nullable: true),
+                    apellidos = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     fecha = table.Column<DateOnly>(type: "date", nullable: true),
                     email = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    consultoriomedicoid = table.Column<int>(type: "integer", nullable: false)
+                    passwordsalt = table.Column<byte[]>(type: "bytea", nullable: false),
+                    consultoriomedicoid = table.Column<int>(type: "integer", nullable: false),
+                    isactivo = table.Column<bool>(type: "boolean", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -304,20 +306,20 @@ namespace api_web.Migrations
                     numhc = table.Column<string>(type: "character varying(25)", maxLength: 25, nullable: false),
                     problemasalud = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     conducta = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    consultaid = table.Column<int>(type: "integer", nullable: false)
+                    tipoconsultamid = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("poblacionhojacargo_pkey", x => new { x.hojacargoid, x.poblacionid });
                     table.ForeignKey(
+                        name: "fkpoblacionh100994",
+                        column: x => x.tipoconsultamid,
+                        principalTable: "tipoconsultam",
+                        principalColumn: "id");
+                    table.ForeignKey(
                         name: "fkpoblacionh179340",
                         column: x => x.poblacionid,
                         principalTable: "poblacion",
-                        principalColumn: "id");
-                    table.ForeignKey(
-                        name: "fkpoblacionh60564",
-                        column: x => x.consultaid,
-                        principalTable: "consulta",
                         principalColumn: "id");
                     table.ForeignKey(
                         name: "fkpoblacionh619752",
@@ -325,6 +327,26 @@ namespace api_web.Migrations
                         principalTable: "hojacargo",
                         principalColumn: "id");
                 });
+
+            migrationBuilder.InsertData(
+                table: "consultoriomedico",
+                columns: new[] { "id", "nombre" },
+                values: new object[] { 1, "consultorio" });
+
+            migrationBuilder.InsertData(
+                table: "rol",
+                columns: new[] { "id", "name", "role" },
+                values: new object[] { 1, "Administrador", "ROLE_ADMIN" });
+
+            migrationBuilder.InsertData(
+                table: "User",
+                columns: new[] { "id", "apellidos", "consultoriomedicoid", "email", "fecha", "isactivo", "nombre", "password", "passwordsalt", "usuario" },
+                values: new object[] { 1, null, 1, "admin@gmail.com", null, null, null, new byte[] { 247, 115, 186, 192, 35, 179, 179, 194, 90, 126, 166, 251, 189, 159, 220, 139, 222, 183, 155, 79, 148, 153, 105, 246, 236, 44, 18, 11, 198, 155, 115, 85, 66, 120, 163, 63, 142, 82, 201, 194, 201, 215, 149, 96, 245, 93, 36, 101, 192, 158, 128, 38, 224, 250, 87, 177, 70, 7, 44, 50, 78, 229, 234, 217 }, new byte[] { 247, 27, 85, 219, 243, 1, 75, 113, 255, 25, 44, 39, 56, 207, 57, 146, 132, 223, 8, 211, 50, 179, 25, 44, 72, 167, 3, 246, 96, 227, 91, 9, 129, 74, 225, 31, 108, 199, 121, 77, 31, 217, 111, 49, 144, 91, 242, 246, 199, 251, 241, 106, 216, 64, 234, 6, 151, 12, 25, 62, 114, 158, 124, 13, 73, 69, 103, 93, 75, 115, 227, 125, 19, 32, 82, 64, 89, 69, 5, 27, 39, 167, 201, 144, 232, 49, 9, 4, 174, 82, 177, 91, 176, 164, 104, 7, 21, 51, 191, 153, 191, 198, 215, 222, 57, 183, 213, 55, 185, 133, 132, 214, 161, 127, 173, 32, 139, 124, 182, 207, 172, 246, 185, 150, 7, 92, 155, 16 }, "admin" });
+
+            migrationBuilder.InsertData(
+                table: "userrol",
+                columns: new[] { "rolid", "userid", "fecha" },
+                values: new object[] { 1, 1, new DateOnly(1, 1, 1) });
 
             migrationBuilder.CreateIndex(
                 name: "calle_direccion_key",
@@ -392,14 +414,14 @@ namespace api_web.Migrations
                 column: "poblacionid");
 
             migrationBuilder.CreateIndex(
-                name: "IX_poblacionhojacargo_consultaid",
-                table: "poblacionhojacargo",
-                column: "consultaid");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_poblacionhojacargo_poblacionid",
                 table: "poblacionhojacargo",
                 column: "poblacionid");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_poblacionhojacargo_tipoconsultamid",
+                table: "poblacionhojacargo",
+                column: "tipoconsultamid");
 
             migrationBuilder.CreateIndex(
                 name: "IX_poblacionintervension_poblacionid",
@@ -459,7 +481,7 @@ namespace api_web.Migrations
                 name: "factorriesgo");
 
             migrationBuilder.DropTable(
-                name: "consulta");
+                name: "tipoconsultam");
 
             migrationBuilder.DropTable(
                 name: "hojacargo");

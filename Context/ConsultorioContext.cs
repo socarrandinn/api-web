@@ -1,24 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
+using api_web.DTOs;
+using api_web.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace api_web.Models
+namespace api_web.Context
 {
-    public partial class consultorioContext : DbContext
+    public partial class ConsultorioContext : DbContext
     {
-        public consultorioContext()
+        public ConsultorioContext()
         {
         }
 
-        public consultorioContext(DbContextOptions<consultorioContext> options)
+        public ConsultorioContext(DbContextOptions<ConsultorioContext> options)
             : base(options)
         {
         }
 
         public virtual DbSet<Calle> Calles { get; set; } = null!;
         public virtual DbSet<Consultoriomedico> Consultoriomedicos { get; set; } = null!;
-        public virtual DbSet<Consulta> Consulta { get; set; } = null!;
         public virtual DbSet<Enfermedad> Enfermedads { get; set; } = null!;
         public virtual DbSet<Factorriesgo> Factorriesgos { get; set; } = null!;
         public virtual DbSet<Grupo> Grupos { get; set; } = null!;
@@ -30,6 +32,7 @@ namespace api_web.Models
         public virtual DbSet<Poblacionhojacargo> Poblacionhojacargos { get; set; } = null!;
         public virtual DbSet<Poblacionintervension> Poblacionintervensions { get; set; } = null!;
         public virtual DbSet<Rol> Rols { get; set; } = null!;
+        public virtual DbSet<Tipoconsultam> Tipoconsultams { get; set; } = null!;
         public virtual DbSet<User> Users { get; set; } = null!;
         public virtual DbSet<Userrol> Userrols { get; set; } = null!;
 
@@ -62,17 +65,6 @@ namespace api_web.Models
                 entity.Property(e => e.Nombre)
                     .HasMaxLength(150)
                     .HasColumnName("nombre");
-            });
-
-            modelBuilder.Entity<Consulta>(entity =>
-            {
-                entity.ToTable("consulta");
-
-                entity.Property(e => e.Id).HasColumnName("id");
-
-                entity.Property(e => e.Tipoconsulta)
-                    .HasMaxLength(40)
-                    .HasColumnName("tipoconsulta");
             });
 
             modelBuilder.Entity<Enfermedad>(entity =>
@@ -277,8 +269,6 @@ namespace api_web.Models
                     .HasMaxLength(255)
                     .HasColumnName("conducta");
 
-                entity.Property(e => e.Consultaid).HasColumnName("consultaid");
-
                 entity.Property(e => e.Numhc)
                     .HasMaxLength(25)
                     .HasColumnName("numhc");
@@ -287,11 +277,7 @@ namespace api_web.Models
                     .HasMaxLength(255)
                     .HasColumnName("problemasalud");
 
-                entity.HasOne(d => d.Consulta)
-                    .WithMany(p => p.Poblacionhojacargos)
-                    .HasForeignKey(d => d.Consultaid)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("fkpoblacionh60564");
+                entity.Property(e => e.Tipoconsultamid).HasColumnName("tipoconsultamid");
 
                 entity.HasOne(d => d.Hojacargo)
                     .WithMany(p => p.Poblacionhojacargos)
@@ -304,6 +290,12 @@ namespace api_web.Models
                     .HasForeignKey(d => d.Poblacionid)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("fkpoblacionh179340");
+
+                entity.HasOne(d => d.Tipoconsultam)
+                    .WithMany(p => p.Poblacionhojacargos)
+                    .HasForeignKey(d => d.Tipoconsultamid)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("fkpoblacionh100994");
             });
 
             modelBuilder.Entity<Poblacionintervension>(entity =>
@@ -353,6 +345,17 @@ namespace api_web.Models
                     .HasColumnName("role");
             });
 
+            modelBuilder.Entity<Tipoconsultam>(entity =>
+            {
+                entity.ToTable("tipoconsultam");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.Tipo)
+                    .HasMaxLength(40)
+                    .HasColumnName("tipo");
+            });
+
             modelBuilder.Entity<User>(entity =>
             {
                 entity.ToTable("User");
@@ -374,13 +377,15 @@ namespace api_web.Models
 
                 entity.Property(e => e.Fecha).HasColumnName("fecha");
 
+                entity.Property(e => e.Isactivo).HasColumnName("isactivo");
+
                 entity.Property(e => e.Nombre)
                     .HasMaxLength(60)
                     .HasColumnName("nombre");
 
-                entity.Property(e => e.Password)
-                    .HasMaxLength(150)
-                    .HasColumnName("password");
+                entity.Property(e => e.Password).HasColumnName("password");
+
+                entity.Property(e => e.Passwordsalt).HasColumnName("passwordsalt");
 
                 entity.Property(e => e.Usuario)
                     .HasMaxLength(30)
@@ -419,9 +424,66 @@ namespace api_web.Models
                     .HasConstraintName("fkuserrol5560");
             });
 
+
+            Seed(modelBuilder);
+
             OnModelCreatingPartial(modelBuilder);
         }
 
+
+
+        private void Seed(ModelBuilder builder)
+        {
+            CreatePasswordHast("admin", out byte[] passwordHast, out byte[] passwordSalt);
+
+            var consultorio = new ConsultoriomedicoDTO()
+            {
+
+                Id = 1,
+                Nombre = "consultorio"
+            };
+
+            builder.Entity<Consultoriomedico>().HasData(consultorio);
+
+            var usuarioAdmin = new User()
+            {
+                Id = 1,
+                Email = "admin@gmail.com",
+                Usuario = "admin",
+                Password = passwordHast,
+                Passwordsalt = passwordSalt,
+                Consultoriomedicoid = consultorio.Id
+            };
+
+            var rolAdmin = new Rol()
+            {
+                Id = 1,
+                Name = "Administrador",
+                Role = "ROLE_ADMIN"
+            };
+
+            builder.Entity<Rol>().HasData(rolAdmin);
+            builder.Entity<User>().HasData(usuarioAdmin);
+
+            var userRoleAdmin = new Userrol()
+            {
+                Rolid = rolAdmin.Id,
+                Userid = usuarioAdmin.Id
+            };
+
+            builder.Entity<Userrol>().HasData(userRoleAdmin);
+        }
+
+
+        private void CreatePasswordHast(string password, out byte[] passwordHast, out byte[] passwordSalt)
+        {
+            using (var hmac = new HMACSHA512())
+            {
+                passwordSalt = hmac.Key;
+                passwordHast = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+            }
+
+        }
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
 }

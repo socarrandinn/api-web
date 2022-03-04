@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using api_web.Models;
+using api_web.Context;
 
 namespace api_web.Controllers
 {
@@ -14,9 +15,9 @@ namespace api_web.Controllers
     [ApiController]
     public class PoblacionsController : ControllerBase
     {
-        private readonly consultorioContext _context;
+        private readonly ConsultorioContext _context;
 
-        public PoblacionsController(consultorioContext context)
+        public PoblacionsController(ConsultorioContext context)
         {
             _context = context;
         }

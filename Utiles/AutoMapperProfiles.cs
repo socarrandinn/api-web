@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using api_web.DTOs.Users;
 using api_web.DTOs;
 using api_web.Models;
 

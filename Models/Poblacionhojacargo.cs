@@ -10,10 +10,10 @@ namespace api_web.Models
         public string Numhc { get; set; } = null!;
         public string Problemasalud { get; set; } = null!;
         public string Conducta { get; set; } = null!;
-        public int Consultaid { get; set; }
+        public int Tipoconsultamid { get; set; }
 
-        public virtual Consulta Consulta { get; set; } = null!;
         public virtual Hojacargo Hojacargo { get; set; } = null!;
         public virtual Poblacion Poblacion { get; set; } = null!;
+        public virtual Tipoconsultam Tipoconsultam { get; set; } = null!;
     }
 }
