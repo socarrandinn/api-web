@@ -54,7 +54,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 
-//configuración de Cors 
+//Configuración de Cors 
 builder.Services.AddCors(opcion =>
 {
     var frontendURL = builder.Services
@@ -64,11 +64,9 @@ builder.Services.AddCors(opcion =>
     {
         builder.WithOrigins(frontendURL).AllowAnyMethod().AllowAnyHeader();
     });
-
 });
 
-
-
+//Configuración Autenticación
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
@@ -83,6 +81,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
             .GetBytes(builder.Configuration["Jwt:key"]))
     };
 });
+
+//Configuración Mappeo de BaseDatos
 builder.Services.AddAutoMapper(typeof(Program));
 
 
